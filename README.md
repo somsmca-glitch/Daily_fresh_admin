@@ -97,6 +97,17 @@ generator) are all safe to re-run on a fresh database if you want to reset
 or regenerate the demo set — `part3.sql` uses random data each run, so
 re-running it adds another ~100 orders rather than replacing the old ones.
 
+## WhatsApp reorder reminders
+
+The **Reminders** page finds customers whose last delivered order was
+~30 days ago and haven't reordered since, and sends them a WhatsApp
+message via Meta's Cloud API — either on a daily schedule or on demand via
+a "Send reminders now" button. Fully built and deployed (database function,
+Edge Function, admin UI), but sending real messages needs your own Meta
+Business account, an approved message template, and a few secrets —
+**see `WHATSAPP_SETUP.md` for the exact steps**, none of which I can
+complete on your behalf.
+
 ## Dashboard charts
 
 The dashboard now includes a 30-day revenue trend line chart and an orders-

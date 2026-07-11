@@ -7,6 +7,7 @@ import Products from './pages/Products'
 import Orders from './pages/Orders'
 import Inventory from './pages/Inventory'
 import Customers from './pages/Customers'
+import Reminders from './pages/Reminders'
 
 export default function App() {
   const { session, profile, loading } = useAuth()
@@ -31,6 +32,7 @@ export default function App() {
         <Route path="/orders" element={<Orders />} />
         <Route path="/inventory" element={<Inventory />} />
         <Route path="/customers" element={<Customers />} />
+        <Route path="/reminders" element={<Reminders />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>

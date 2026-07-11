@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { to: '/orders', label: 'Orders', icon: '▣' },
   { to: '/inventory', label: 'Inventory', icon: '▥' },
   { to: '/customers', label: 'Customers', icon: '◐' },
+  { to: '/reminders', label: 'Reminders', icon: '◔' },
 ]
 
 export default function Layout({ children }: { children: ReactNode }) {
