@@ -97,16 +97,54 @@ generator) are all safe to re-run on a fresh database if you want to reset
 or regenerate the demo set — `part3.sql` uses random data each run, so
 re-running it adds another ~100 orders rather than replacing the old ones.
 
-## WhatsApp reorder reminders
+## All pages
 
-The **Reminders** page finds customers whose last delivered order was
-~30 days ago and haven't reordered since, and sends them a WhatsApp
-message via Meta's Cloud API — either on a daily schedule or on demand via
-a "Send reminders now" button. Fully built and deployed (database function,
-Edge Function, admin UI), but sending real messages needs your own Meta
-Business account, an approved message template, and a few secrets —
-**see `WHATSAPP_SETUP.md` for the exact steps**, none of which I can
-complete on your behalf.
+| Page | What it does | Who can edit |
+|---|---|---|
+| Dashboard | KPIs, revenue/status charts, low-stock alerts, top products | — |
+| Products | Catalog list, search, add/edit | super_admin edits; everyone views |
+| Categories & Brands | Hierarchical category tree, brand list, add/edit | all staff |
+| Inventory | Stock levels by warehouse, reorder thresholds | reorder level: all staff; stock count: super_admin |
+| Suppliers | Supplier directory, add/edit | all staff |
+| Orders | Order list, live status updates | all staff (scoped to assigned store, unless super_admin) |
+| Customers | Customer directory, wallet/loyalty/status edit | super_admin edits; everyone views |
+| Coupons & Offers | Coupon list, add/edit | all staff |
+| Reminders | WhatsApp campaigns, templates, individual sends, history | all staff |
+| Delivery Partners | Partner directory, availability/status | all staff |
+| Employees | Staff directory, salary/status | super_admin edits; everyone views |
+| Stores & Warehouses | Store locations, hours, delivery radius | all staff |
+
+"All staff" reflects the database RLS policies already in place — the UI
+just doesn't show edit controls a given role can't actually use.
+
+## Super admin access
+
+`super_admin` has genuinely unrestricted read/write/delete access to every
+table in the `app` schema — enforced at the database level (RLS), not just
+hidden/shown in the UI. Verified with real tests: confirmed a super_admin
+can write to tables that are normally staff-role-scoped (e.g. `departments`,
+`employees`), and confirmed a non-admin is still correctly blocked from the
+same action. `audit.activity_log` is deliberately excluded — even
+super_admin can't edit or delete audit entries, since that would defeat the
+point of an audit trail; it stays read-only for everyone, viewable only by
+super_admin.
+
+Edit controls that only make sense for someone with that level of access
+(editing existing products, correcting a customer's wallet/loyalty balance,
+directly correcting inventory counts) are gated in the UI to
+`profile.role === 'super_admin'` so other staff don't see buttons that
+would just fail — but the real gate is the database policy, not the UI
+check.
+
+## WhatsApp reminders
+
+The **Reminders** page supports multiple configurable campaigns (each with
+its own message template and "days since last order" interval — not a
+single hardcoded 30-day rule anymore), one-off messages to individual
+customers, and a full send history. Fully built and deployed (database
+schema, Edge Function, admin UI), but sending real messages needs your own
+Meta Business account, approved message template(s), and a couple of
+secrets only you can set — **see `WHATSAPP_SETUP.md` for the exact steps**.
 
 ## Dashboard charts
 

@@ -2,13 +2,37 @@ import { type ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 
-const NAV_ITEMS = [
-  { to: '/', label: 'Dashboard', icon: '◈' },
-  { to: '/products', label: 'Products', icon: '▤' },
-  { to: '/orders', label: 'Orders', icon: '▣' },
-  { to: '/inventory', label: 'Inventory', icon: '▥' },
-  { to: '/customers', label: 'Customers', icon: '◐' },
-  { to: '/reminders', label: 'Reminders', icon: '◔' },
+const NAV_GROUPS = [
+  {
+    label: 'Overview',
+    items: [{ to: '/', label: 'Dashboard', icon: '◈' }],
+  },
+  {
+    label: 'Catalog',
+    items: [
+      { to: '/products', label: 'Products', icon: '▤' },
+      { to: '/categories', label: 'Categories & Brands', icon: '▦' },
+      { to: '/inventory', label: 'Inventory', icon: '▥' },
+      { to: '/suppliers', label: 'Suppliers', icon: '▧' },
+    ],
+  },
+  {
+    label: 'Sales',
+    items: [
+      { to: '/orders', label: 'Orders', icon: '▣' },
+      { to: '/customers', label: 'Customers', icon: '◐' },
+      { to: '/coupons', label: 'Coupons & Offers', icon: '◆' },
+      { to: '/reminders', label: 'Reminders', icon: '◔' },
+    ],
+  },
+  {
+    label: 'People & Stores',
+    items: [
+      { to: '/delivery-partners', label: 'Delivery Partners', icon: '➤' },
+      { to: '/employees', label: 'Employees', icon: '◫' },
+      { to: '/stores', label: 'Stores & Warehouses', icon: '⌂' },
+    ],
+  },
 ]
 
 export default function Layout({ children }: { children: ReactNode }) {
@@ -26,23 +50,32 @@ export default function Layout({ children }: { children: ReactNode }) {
               Grocery · Ops Console
             </p>
           </div>
-          <nav className="mt-4 flex flex-col gap-0.5 px-3">
-            {NAV_ITEMS.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.to === '/'}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors ${
-                    isActive
-                      ? 'bg-crate-500 text-white font-medium'
-                      : 'text-crate-100 hover:bg-white/5'
-                  }`
-                }
-              >
-                <span aria-hidden className="text-base">{item.icon}</span>
-                {item.label}
-              </NavLink>
+          <nav className="mt-4 flex flex-col gap-4 px-3 max-h-[calc(100vh-180px)] overflow-y-auto">
+            {NAV_GROUPS.map((group) => (
+              <div key={group.label}>
+                <p className="mb-1 px-3 font-mono text-[10px] uppercase tracking-widest text-crate-300/70">
+                  {group.label}
+                </p>
+                <div className="flex flex-col gap-0.5">
+                  {group.items.map((item) => (
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      end={item.to === '/'}
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
+                          isActive
+                            ? 'bg-crate-500 text-white font-medium'
+                            : 'text-crate-100 hover:bg-white/5'
+                        }`
+                      }
+                    >
+                      <span aria-hidden className="text-base">{item.icon}</span>
+                      {item.label}
+                    </NavLink>
+                  ))}
+                </div>
+              </div>
             ))}
           </nav>
         </div>
