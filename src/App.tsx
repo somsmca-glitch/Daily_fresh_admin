@@ -14,6 +14,8 @@ import Employees from './pages/Employees'
 import Coupons from './pages/Coupons'
 import Categories from './pages/Categories'
 import Stores from './pages/Stores'
+import Banners from './pages/Banners'
+import Analytics from './pages/Analytics'
 
 export default function App() {
   const { session, profile, loading } = useAuth()
@@ -45,6 +47,8 @@ export default function App() {
         <Route path="/coupons" element={<Coupons />} />
         <Route path="/categories" element={<Categories />} />
         <Route path="/stores" element={<Stores />} />
+        <Route path="/banners" element={<Banners />} />
+        <Route path="/analytics" element={<Analytics />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>

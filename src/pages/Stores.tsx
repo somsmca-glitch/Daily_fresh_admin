@@ -6,8 +6,12 @@ interface Store {
   store_code: string
   store_name: string
   store_type: string
+  address_line1: string
   city: string
   state: string
+  pincode: string
+  latitude: number
+  longitude: number
   phone: string | null
   opening_time: string | null
   closing_time: string | null
@@ -32,7 +36,7 @@ export default function Stores() {
 
   async function load() {
     setLoading(true)
-    const { data } = await supabase.from('stores').select('id, store_code, store_name, store_type, city, state, phone, opening_time, closing_time, delivery_radius_km, is_active').order('store_name')
+    const { data } = await supabase.from('stores').select('*').order('store_name')
     setStores((data as Store[]) ?? [])
     setLoading(false)
   }
@@ -41,17 +45,32 @@ export default function Stores() {
 
   function startAdd() { setForm(emptyForm); setError(null); setShowForm(true) }
 
+  function startEdit(s: Store) {
+    setForm({
+      id: s.id, store_code: s.store_code, store_name: s.store_name, address_line1: s.address_line1,
+      city: s.city, state: s.state, pincode: s.pincode, latitude: String(s.latitude), longitude: String(s.longitude),
+      phone: s.phone ?? '', opening_time: s.opening_time?.slice(0, 5) ?? '06:00',
+      closing_time: s.closing_time?.slice(0, 5) ?? '23:00', delivery_radius_km: String(s.delivery_radius_km),
+      is_active: s.is_active,
+    })
+    setError(null)
+    setShowForm(true)
+  }
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
     setError(null)
-    const { error: err } = await supabase.from('stores').insert({
+    const payload = {
       store_code: form.store_code, store_name: form.store_name, address_line1: form.address_line1,
       city: form.city, state: form.state, pincode: form.pincode,
       latitude: Number(form.latitude), longitude: Number(form.longitude),
       phone: form.phone || null, opening_time: form.opening_time, closing_time: form.closing_time,
       delivery_radius_km: Number(form.delivery_radius_km), is_active: form.is_active,
-    })
+    }
+    const { error: err } = form.id
+      ? await supabase.from('stores').update(payload).eq('id', form.id)
+      : await supabase.from('stores').insert(payload)
     if (err) { setError(err.message); setSaving(false); return }
     setShowForm(false); setSaving(false); load()
   }
@@ -75,6 +94,9 @@ export default function Stores() {
 
       {showForm && (
         <form onSubmit={handleSave} className="card grid grid-cols-3 gap-4">
+          <p className="col-span-3 font-display text-sm font-semibold text-ink/70">
+            {form.id ? `Editing ${form.store_name}` : 'New store'}
+          </p>
           <div><label className="mb-1 block text-xs font-medium text-ink/70">Store code</label>
             <input required className="input" value={form.store_code} onChange={(e) => setForm({ ...form, store_code: e.target.value })} placeholder="STR-XXX-01" /></div>
           <div className="col-span-2"><label className="mb-1 block text-xs font-medium text-ink/70">Store name</label>
@@ -99,10 +121,14 @@ export default function Stores() {
             <input type="time" className="input" value={form.opening_time} onChange={(e) => setForm({ ...form, opening_time: e.target.value })} /></div>
           <div><label className="mb-1 block text-xs font-medium text-ink/70">Closing time</label>
             <input type="time" className="input" value={form.closing_time} onChange={(e) => setForm({ ...form, closing_time: e.target.value })} /></div>
+          <div className="flex items-end gap-2 pb-2">
+            <input type="checkbox" id="st_active" className="h-4 w-4" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} />
+            <label htmlFor="st_active" className="text-xs font-medium text-ink/70">Active</label>
+          </div>
 
           {error && <p className="col-span-3 rounded-md bg-brick-100 px-3 py-2 text-sm text-brick-700">{error}</p>}
           <div className="col-span-3 flex gap-2">
-            <button type="submit" disabled={saving} className="btn-primary">{saving ? 'Saving…' : 'Save store'}</button>
+            <button type="submit" disabled={saving} className="btn-primary">{saving ? 'Saving…' : form.id ? 'Save changes' : 'Save store'}</button>
             <button type="button" className="btn-secondary" onClick={() => setShowForm(false)}>Cancel</button>
           </div>
         </form>
@@ -113,7 +139,7 @@ export default function Stores() {
           <table className="w-full">
             <thead><tr>
               <th className="th">Store</th><th className="th">Location</th><th className="th">Hours</th>
-              <th className="th text-right">Radius</th><th className="th">Active</th>
+              <th className="th text-right">Radius</th><th className="th">Active</th><th className="th"></th>
             </tr></thead>
             <tbody>
               {stores.map((s) => (
@@ -126,6 +152,9 @@ export default function Stores() {
                     <button onClick={() => toggleActive(s)} className={`stamp cursor-pointer ${s.is_active ? 'border-crate-300 bg-crate-50 text-crate-700' : 'border-line text-ink/50'}`}>
                       {s.is_active ? 'active' : 'inactive'}
                     </button>
+                  </td>
+                  <td className="td text-right">
+                    <button className="text-xs font-medium text-crate-700 underline decoration-crate-300 underline-offset-2 hover:text-crate-500" onClick={() => startEdit(s)}>Edit</button>
                   </td>
                 </tr>
               ))}

@@ -2,7 +2,14 @@ import { type ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 
-const NAV_GROUPS = [
+interface NavItem {
+  to: string
+  label: string
+  icon: string
+  superAdminOnly?: boolean
+}
+
+const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   {
     label: 'Overview',
     items: [{ to: '/', label: 'Dashboard', icon: '◈' }],
@@ -12,6 +19,7 @@ const NAV_GROUPS = [
     items: [
       { to: '/products', label: 'Products', icon: '▤' },
       { to: '/categories', label: 'Categories & Brands', icon: '▦' },
+      { to: '/banners', label: 'Banners', icon: '▨' },
       { to: '/inventory', label: 'Inventory', icon: '▥' },
       { to: '/suppliers', label: 'Suppliers', icon: '▧' },
     ],
@@ -33,6 +41,12 @@ const NAV_GROUPS = [
       { to: '/stores', label: 'Stores & Warehouses', icon: '⌂' },
     ],
   },
+  {
+    label: 'Insights',
+    items: [
+      { to: '/analytics', label: 'Analytics & Reports', icon: '◧', superAdminOnly: true },
+    ],
+  },
 ]
 
 export default function Layout({ children }: { children: ReactNode }) {
@@ -51,32 +65,36 @@ export default function Layout({ children }: { children: ReactNode }) {
             </p>
           </div>
           <nav className="mt-4 flex flex-col gap-4 px-3 max-h-[calc(100vh-180px)] overflow-y-auto">
-            {NAV_GROUPS.map((group) => (
-              <div key={group.label}>
-                <p className="mb-1 px-3 font-mono text-[10px] uppercase tracking-widest text-crate-300/70">
-                  {group.label}
-                </p>
-                <div className="flex flex-col gap-0.5">
-                  {group.items.map((item) => (
-                    <NavLink
-                      key={item.to}
-                      to={item.to}
-                      end={item.to === '/'}
-                      className={({ isActive }) =>
-                        `flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
-                          isActive
-                            ? 'bg-crate-500 text-white font-medium'
-                            : 'text-crate-100 hover:bg-white/5'
-                        }`
-                      }
-                    >
-                      <span aria-hidden className="text-base">{item.icon}</span>
-                      {item.label}
-                    </NavLink>
-                  ))}
+            {NAV_GROUPS.map((group) => {
+              const visibleItems = group.items.filter((item) => !item.superAdminOnly || profile?.role === 'super_admin')
+              if (visibleItems.length === 0) return null
+              return (
+                <div key={group.label}>
+                  <p className="mb-1 px-3 font-mono text-[10px] uppercase tracking-widest text-crate-300/70">
+                    {group.label}
+                  </p>
+                  <div className="flex flex-col gap-0.5">
+                    {visibleItems.map((item) => (
+                      <NavLink
+                        key={item.to}
+                        to={item.to}
+                        end={item.to === '/'}
+                        className={({ isActive }) =>
+                          `flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
+                            isActive
+                              ? 'bg-crate-500 text-white font-medium'
+                              : 'text-crate-100 hover:bg-white/5'
+                          }`
+                        }
+                      >
+                        <span aria-hidden className="text-base">{item.icon}</span>
+                        {item.label}
+                      </NavLink>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </nav>
         </div>
 
