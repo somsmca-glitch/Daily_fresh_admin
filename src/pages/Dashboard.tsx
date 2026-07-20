@@ -45,7 +45,7 @@ export default function Dashboard() {
         supabaseReporting.from('v_store_performance').select('*'),
         supabaseReporting.from('v_low_stock_alerts').select('*'),
         supabaseReporting.from('v_top_products_30d').select('*').limit(8),
-        supabase.from('orders').select('placed_at, total_amount, status').gte('placed_at', since.toISOString()),
+        supabase.from('orders').select('placed_at, total_amount, status').eq('is_deleted', false).gte('placed_at', since.toISOString()),
       ])
       setStores((storeRes.data as StorePerformanceRow[]) ?? [])
       setLowStock((lowStockRes.data as LowStockRow[]) ?? [])
